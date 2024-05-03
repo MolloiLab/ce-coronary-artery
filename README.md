@@ -32,7 +32,7 @@ Now, you should be able to use `conda` commands.
 - `conda activate imagecas` to run the virtual environment
 - `conda install pip` to install `pip` package manager for the virtual environment
 - you have to check if you are using the correct pip by `pip --version` and see the path of the pip. It should be some path that contains miniconda3 like `.../miniconda3/env/imagecas...`
-- if your pip is not having the correct path, contact Liam. (I think you should delete the pyenve settings in .bashrc or .bash_profile Andrew :))
+- if your pip is not having the correct path, contact Liam. (I think you should delete the pyenv settings in .bashrc or .bash_profile Andrew :))
 - [unnecessary] you can check if you are using the correct python version by `python --version` and see the path of the pip
 
 ### Install Dependencies
@@ -41,4 +41,7 @@ Now, you should be able to use `conda` commands.
 - done :)
 
 ### Run the project with marimo
+- in your environment, do `pip install marimo`
+- run `marimo edit [filename] --host 0.0.0.0 --port [num]` to run the marimo file, an example is `marimo edit newTest.py --host 0.0.0.0 --port 1234
+- do ssh port forwarding mentioned in `Zulip` group chat
 
