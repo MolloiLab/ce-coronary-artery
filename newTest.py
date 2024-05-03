@@ -90,11 +90,8 @@ def __(print_config):
 
 
 @app.cell
-def __(os, tempfile):
-    directory = os.environ.get("MONAI_DATA_DIRECTORY")
-    root_dir = tempfile.mkdtemp() if directory is None else directory
-    print(root_dir)
-    return directory, root_dir
+def __():
+    return
 
 
 @app.cell
@@ -104,15 +101,11 @@ def __():
 
 
 @app.cell
-def __(download_and_extract, os, root_dir):
-    resource = "https://msd-for-monai.s3-us-west-2.amazonaws.com/Task09_Spleen.tar"
-    md5 = "410d4a301da4e5b2f6f86ec3ddba524e"
+def __(os):
 
-    compressed_file = os.path.join(root_dir, "Task09_Spleen.tar")
-    data_dir = os.path.join(root_dir, "Task09_Spleen")
-    if not os.path.exists(data_dir):
-        download_and_extract(resource, compressed_file, root_dir, md5)
-    return compressed_file, data_dir, md5, resource
+    root_dir = "/dfs7/symolloi-lab/msd_heart_dir"
+    data_dir = os.path.join(root_dir, "Task02_Heart")
+    return data_dir, root_dir
 
 
 @app.cell
@@ -208,10 +201,10 @@ def __(DataLoader, Dataset, first, plt, val_files, val_transforms):
     plt.figure("check", (12, 6))
     plt.subplot(1, 2, 1)
     plt.title("image")
-    plt.imshow(image[:, :, 80], cmap="gray")
+    plt.imshow(image[:, :, 40], cmap="gray")
     plt.subplot(1, 2, 2)
     plt.title("label")
-    plt.imshow(label[:, :, 80])
+    plt.imshow(label[:, :, 20])
     plt.show()
     return check_data, check_ds, check_loader, image, label
 
