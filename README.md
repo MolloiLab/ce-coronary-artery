@@ -42,6 +42,6 @@ Now, you should be able to use `conda` commands.
 
 ### Run the project with marimo
 - in your environment, do `pip install marimo`
-- run `marimo edit [filename] --host 0.0.0.0 --port [num]` to run the marimo file, an example is `marimo edit newTest.py --host 0.0.0.0 --port 1234
+- run `marimo edit [filename] --host 0.0.0.0 --port [num]` to run the marimo file, an example is `marimo edit newTest.py --host 0.0.0.0 --port 1234`
 - do ssh port forwarding mentioned in `Zulip` group chat
 
