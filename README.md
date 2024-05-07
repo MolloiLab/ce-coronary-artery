@@ -1,8 +1,18 @@
-# marimo-imagecas introduction
+# ce-coronary-artery
+Repository for automatic segmentation of contrast enhanced (ce) coronary arteries.
 
-Testing
+## Overview
+- This projet utilizes the [ImageCAS](https://doi.org/10.1016/j.compmedimag.2023.102287) dataset 
+  - Contains 1000 contrast enhanced CT angiography images with 1000 corresponding coronary artery labels
+- The Hausdorff loss function is utilized throughout the training process
+- The (.....TBD) model is utilized
 
-# virtual environment setup
+## Goals
+- Introduce a state of the art coronary artery segmentation model
+  - Measured in terms of dice coefficient, hausdorff distance, overlap, ...
+- Introduce the vendor neutral, GPU optimizzed Hausdorff loss function
+
+## virtual environment setup
 ### Prerequisite
 You should login in to the cluster. \
 You can be in any node(server). I recommand you to login to the free CPU server.
