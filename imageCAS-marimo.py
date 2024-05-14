@@ -91,31 +91,48 @@ def __(print_config):
 
 @app.cell
 def __():
-    return
-
-
-@app.cell
-def __():
     # Download Dataset
     return
 
 
 @app.cell
 def __(os):
+    # Cleaning and organizing ImageCAS dataset
 
-    root_dir = "/dfs7/symolloi-lab/msd_heart_dir"
-    data_dir = os.path.join(root_dir, "Task02_Heart")
-    return data_dir, root_dir
+    root_dir = "/dfs7/symolloi-lab/imageCAS"
+    images = []
+    labels = []
+    for filename in os.listdir(root_dir):
+        # Construct full file path
+        filepath = os.path.join(root_dir, filename)
+        for f in os.listdir(filepath):
+            if f.startswith('img'):
+                images.append( os.path.join(filepath, f))
+            else:
+                labels.append(os.path.join(filepath, f))
+
+    data_set = zip(images, labels)
+
+    data_dicts = [{"image": image_name, "label": label_name} for image_name, label_name in zip(images, labels)]
+
+    print(data_dicts)
+    return (
+        data_dicts,
+        data_set,
+        f,
+        filename,
+        filepath,
+        images,
+        labels,
+        root_dir,
+    )
 
 
 @app.cell
-def __(data_dir, glob, os):
-    # Set MSD Spleen dataset path
-    train_images = sorted(glob.glob(os.path.join(data_dir, "imagesTr", "*.nii.gz")))
-    train_labels = sorted(glob.glob(os.path.join(data_dir, "labelsTr", "*.nii.gz")))
-    data_dicts = [{"image": image_name, "label": label_name} for image_name, label_name in zip(train_images, train_labels)]
+def __(data_dicts):
+    print(len(data_dicts))
     train_files, val_files = data_dicts[:-9], data_dicts[-9:]
-    return data_dicts, train_files, train_images, train_labels, val_files
+    return train_files, val_files
 
 
 @app.cell
