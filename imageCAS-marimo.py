@@ -143,7 +143,7 @@ def __(os):
 @app.cell
 def __(data_dicts):
     print(len(data_dicts))
-    train_files, val_files = data_dicts[:-950], data_dicts[-950:]
+    train_files, val_files = data_dicts[:-975], data_dicts[-975:]
     print(len(train_files))
     print(len(val_files))
     return train_files, val_files
@@ -357,8 +357,8 @@ def __(
     train_loader,
     val_loader,
 ):
-    max_epochs = 5
-    val_interval = 10
+    max_epochs = 100
+    val_interval = 101
     best_metric = -1
     best_metric_epoch = -1
     epoch_loss_values = []
@@ -455,22 +455,22 @@ def __(best_metric, best_metric_epoch):
 
 
 @app.cell
-def __():
-    # plt.figure("train", (12, 6))
-    # plt.subplot(1, 2, 1)
-    # plt.title("Epoch Average Loss")
-    # x = [i + 1 for i in range(len(epoch_loss_values))]
-    # y = epoch_loss_values
-    # plt.xlabel("epoch")
-    # plt.plot(x, y)
-    # plt.subplot(1, 2, 2)
-    # plt.title("Val Mean Dice")
-    # x = [val_interval * (i + 1) for i in range(len(metric_values))]
-    # y = metric_values
-    # plt.xlabel("epoch")
-    # plt.plot(x, y)
-    # plt.show()
-    return
+def __(epoch_loss_values, metric_values, plt, val_interval):
+    plt.figure("train", (12, 6))
+    plt.subplot(1, 2, 1)
+    plt.title("Epoch Average Loss")
+    x = [i + 1 for i in range(len(epoch_loss_values))]
+    y = epoch_loss_values
+    plt.xlabel("epoch")
+    plt.plot(x, y)
+    plt.subplot(1, 2, 2)
+    plt.title("Val Mean Dice")
+    x = [val_interval * (i + 1) for i in range(len(metric_values))]
+    y = metric_values
+    plt.xlabel("epoch")
+    plt.plot(x, y)
+    plt.show()
+    return x, y
 
 
 if __name__ == "__main__":
