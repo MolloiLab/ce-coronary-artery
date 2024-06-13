@@ -57,8 +57,8 @@ def __():
     from monai.handlers.utils import from_engine
     from monai.networks.nets import UNet
     from monai.networks.layers import Norm
-    from monai.metrics import DiceMetric
-    from monai.losses import DiceLoss
+    from monai.metrics import DiceMetric, HausdorffDistanceMetric
+    from monai.losses import DiceLoss, HausdorffDTLoss
     from monai.inferers import sliding_window_inference
     from monai.data import CacheDataset, DataLoader, Dataset, decollate_batch, pad_list_data_collate
     from monai.config import print_config
@@ -69,6 +69,8 @@ def __():
         Dataset,
         DiceLoss,
         DiceMetric,
+        HausdorffDTLoss,
+        HausdorffDistanceMetric,
         Norm,
         UNet,
         decollate_batch,
@@ -143,7 +145,7 @@ def __(os):
 @app.cell
 def __(data_dicts):
     print(len(data_dicts))
-    train_files, val_files = data_dicts[:-975], data_dicts[-975:]
+    train_files, val_files = data_dicts[:25], data_dicts[25:35]
     print(len(train_files))
     print(len(val_files))
     return train_files, val_files
@@ -277,12 +279,9 @@ def __():
 def __(
     CacheDataset,
     DataLoader,
-    Dataset,
     pad_list_data_collate,
     train_files,
     train_transforms,
-    val_files,
-    val_transforms,
 ):
     train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=4)
     # train_ds = Dataset(data=train_files, transform=train_transforms)
@@ -291,17 +290,22 @@ def __(
     # to generate 2 x 4 images for network training
     train_loader = DataLoader(train_ds, batch_size=4, shuffle=True,
                               num_workers=1, collate_fn=pad_list_data_collate)
+    return train_ds, train_loader
 
-    # val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=4)
-    val_ds = Dataset(data=val_files, transform=val_transforms)
-    val_loader = DataLoader(val_ds, batch_size=1, num_workers=1)
 
-    # debug_loader = DataLoader(train_ds, batch_size=1, num_workers=0)
-    # for i, bruh in enumerate(debug_loader):
-    #     print({key: value.shape for key, value in bruh.items()})
-    #     if i > 10:  # Limit the number of batches to inspect
-    #         break
-    return train_ds, train_loader, val_ds, val_loader
+@app.cell
+def __(
+    CacheDataset,
+    DataLoader,
+    pad_list_data_collate,
+    val_files,
+    val_transforms,
+):
+    val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=4)
+    # val_ds = Dataset(data=val_files, transform=val_transforms)
+    val_loader = DataLoader(val_ds, batch_size=4, shuffle=True,
+                              num_workers=1, collate_fn=pad_list_data_collate)
+    return val_ds, val_loader
 
 
 @app.cell(hide_code=True)
@@ -311,8 +315,10 @@ def __(mo):
 
 
 @app.cell
-def __(DiceLoss, DiceMetric, Norm, UNet, torch):
+def __(DiceLoss, HausdorffDistanceMetric, Norm, UNet, torch):
     # standard PyTorch program style: create UNet, DiceLoss and Adam optimizer
+    from monai.metrics import compute_hausdorff_distance
+
     device = torch.device("cuda:0")
     model = UNet(
         spatial_dims=3,
@@ -323,10 +329,23 @@ def __(DiceLoss, DiceMetric, Norm, UNet, torch):
         num_res_units=2,
         norm=Norm.BATCH,
     ).to(device)
+
     loss_function = DiceLoss(to_onehot_y=True, softmax=True)
+    #dice_metric = DiceMetric(include_background=False, reduction="mean")
+
+    # loss_function = HausdorffDTLoss(to_onehot_y=True, softmax=True)
+    hdf_metric = HausdorffDistanceMetric(include_background=False, reduction="mean")
+
     optimizer = torch.optim.Adam(model.parameters(), 1e-4)
-    dice_metric = DiceMetric(include_background=False, reduction="mean")
-    return device, dice_metric, loss_function, model, optimizer
+
+    return (
+        compute_hausdorff_distance,
+        device,
+        hdf_metric,
+        loss_function,
+        model,
+        optimizer,
+    )
 
 
 @app.cell(hide_code=True)
@@ -345,12 +364,10 @@ def __(
     Compose,
     decollate_batch,
     device,
-    dice_metric,
+    hdf_metric,
     loss_function,
     model,
     optimizer,
-    os,
-    root_dir,
     sliding_window_inference,
     torch,
     train_ds,
@@ -358,7 +375,7 @@ def __(
     val_loader,
 ):
     max_epochs = 100
-    val_interval = 101
+    val_interval = 2
     best_metric = -1
     best_metric_epoch = -1
     epoch_loss_values = []
@@ -403,19 +420,19 @@ def __(
                     val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
                     val_labels = [post_label(i) for i in decollate_batch(val_labels)]
                     # compute metric for current iteration
-                    dice_metric(y_pred=val_outputs, y=val_labels)
+                    hdf_metric(y_pred=val_outputs, y=val_labels)
 
                 # aggregate the final mean dice result
-                metric = dice_metric.aggregate().item()
+                metric = hdf_metric.aggregate().item()
                 # reset the status for next validation round
-                dice_metric.reset()
+                hdf_metric.reset()
 
                 metric_values.append(metric)
                 if metric > best_metric:
                     best_metric = metric
                     best_metric_epoch = epoch + 1
-                    torch.save(model.state_dict(), os.path.join(root_dir, "best_metric_model.pth"))
-                    print("saved new best metric model")
+                    # torch.save(model.state_dict(), os.path.join(root_dir, "best_metric_model.pth"))
+                    # print("saved new best metric model")
                 print(
                     f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
                     f"\nbest mean dice: {best_metric:.4f} "
