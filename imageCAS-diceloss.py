@@ -143,7 +143,7 @@ def __(os):
 @app.cell
 def __(data_dicts):
     print(len(data_dicts))
-    train_files, val_files = data_dicts[:-975], data_dicts[-975:]
+    train_files, val_files = data_dicts[:25], data_dicts[25:35]
     print(len(train_files))
     print(len(val_files))
     return train_files, val_files
@@ -277,12 +277,9 @@ def __():
 def __(
     CacheDataset,
     DataLoader,
-    Dataset,
     pad_list_data_collate,
     train_files,
     train_transforms,
-    val_files,
-    val_transforms,
 ):
     train_ds = CacheDataset(data=train_files, transform=train_transforms, cache_rate=1.0, num_workers=4)
     # train_ds = Dataset(data=train_files, transform=train_transforms)
@@ -291,17 +288,22 @@ def __(
     # to generate 2 x 4 images for network training
     train_loader = DataLoader(train_ds, batch_size=4, shuffle=True,
                               num_workers=1, collate_fn=pad_list_data_collate)
+    return train_ds, train_loader
 
-    # val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=4)
-    val_ds = Dataset(data=val_files, transform=val_transforms)
-    val_loader = DataLoader(val_ds, batch_size=1, num_workers=1)
 
-    # debug_loader = DataLoader(train_ds, batch_size=1, num_workers=0)
-    # for i, bruh in enumerate(debug_loader):
-    #     print({key: value.shape for key, value in bruh.items()})
-    #     if i > 10:  # Limit the number of batches to inspect
-    #         break
-    return train_ds, train_loader, val_ds, val_loader
+@app.cell
+def __(
+    CacheDataset,
+    DataLoader,
+    pad_list_data_collate,
+    val_files,
+    val_transforms,
+):
+    val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_rate=1.0, num_workers=4)
+    # val_ds = Dataset(data=val_files, transform=val_transforms)
+    val_loader = DataLoader(val_ds, batch_size=4, shuffle=True,
+                              num_workers=1, collate_fn=pad_list_data_collate)
+    return val_ds, val_loader
 
 
 @app.cell(hide_code=True)
@@ -349,8 +351,6 @@ def __(
     loss_function,
     model,
     optimizer,
-    os,
-    root_dir,
     sliding_window_inference,
     torch,
     train_ds,
@@ -358,7 +358,7 @@ def __(
     val_loader,
 ):
     max_epochs = 100
-    val_interval = 101
+    val_interval = 2
     best_metric = -1
     best_metric_epoch = -1
     epoch_loss_values = []
@@ -414,8 +414,8 @@ def __(
                 if metric > best_metric:
                     best_metric = metric
                     best_metric_epoch = epoch + 1
-                    torch.save(model.state_dict(), os.path.join(root_dir, "best_metric_model.pth"))
-                    print("saved new best metric model")
+                    # torch.save(model.state_dict(), os.path.join(root_dir, "best_metric_model.pth"))
+                    # print("saved new best metric model")
                 print(
                     f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
                     f"\nbest mean dice: {best_metric:.4f} "
