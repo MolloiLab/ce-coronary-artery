@@ -12,7 +12,7 @@ Repository for automatic segmentation of contrast enhanced (ce) coronary arterie
   - Measured in terms of dice coefficient, hausdorff distance, overlap, ...
 - Introduce the vendor neutral, GPU optimizzed Hausdorff loss function
 
-## virtual environment setup
+## Environment Setup
 ### Prerequisite
 You should login in to the cluster. \
 You can be in any node(server). I recommand you to login to the free CPU server.
