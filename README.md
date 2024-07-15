@@ -35,7 +35,7 @@ After running the scripts:
 
 Now, you should be able to use `conda` commands.
 - run `conda --version` to make sure your conda is ready.
-- if you are still not able to use `conda` commands, try `source .bashrc`, which restart/refresh the bash shell.
+- if you are still not able to use `conda` commands, try `source ~/.bashrc`, which restart/refresh the bash shell.
 
 ### Create Env
 - `conda create --name imagecas python=3.9` to create a virtual environment with python version 3.9
