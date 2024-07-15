@@ -12,6 +12,12 @@ def __():
 
 @app.cell
 def __():
+    from py_distance_transforms import transform_cuda
+    return transform_cuda,
+
+
+@app.cell
+def __():
     from monai.utils import first, set_determinism
     from monai.transforms import (
         AsDiscrete,
@@ -28,7 +34,6 @@ def __():
         Spacingd,
         Invertd,
         CenterSpatialCropd,
-
         ResizeWithPadOrCropd
     )
     return (
@@ -109,23 +114,23 @@ def __(mo):
 
 @app.cell
 def __(os):
-    # Cleaning and organizing ImageCAS dataset
+    # # Cleaning and organizing ImageCAS dataset
 
-    root_dir = "/dfs7/symolloi-lab/imageCAS"
-    global_images = []
-    global_labels = []
-    for filename in os.listdir(root_dir):
-        # Construct full file path
-        filepath = os.path.join(root_dir, filename)
-        for f in os.listdir(filepath):
-            if f.startswith('img'):
-                global_images.append( os.path.join(filepath, f))
-            else:
-                global_labels.append(os.path.join(filepath, f))
+    # root_dir = "/dfs7/symolloi-lab/imageCAS"
+    # global_images = []
+    # global_labels = []
+    # for filename in os.listdir(root_dir):
+    #     # Construct full file path
+    #     filepath = os.path.join(root_dir, filename)
+    #     for f in os.listdir(filepath):
+    #         if f.startswith('img'):
+    #             global_images.append( os.path.join(filepath, f))
+    #         else:
+    #             global_labels.append(os.path.join(filepath, f))
 
-    data_set = zip(global_images, global_labels)
+    # data_set = zip(global_images, global_labels)
 
-    data_dicts = [{"image": image_name, "label": label_name} for image_name, label_name in zip(global_images, global_labels)]
+    # data_dicts = [{"image": image_name, "label": label_name} for image_name, label_name in zip(global_images, global_labels)]
 
     print(data_dicts)
     return (
